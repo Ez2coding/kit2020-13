@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "메인페이지"
+    return render_template("main.html") 
 
 @app.route('/hello')
 def hello():
@@ -52,11 +52,10 @@ def input_num(num):
         return "없어요"
     return "hello {}".format(name)
 
-@app.route('/login')
-def login2():
-    return render_template('login.html') 
-
-
+# # 로그인
+# @app.route('/login')
+# def login2():
+#     return render_template('login.html') 
 
 @app.route('/method', methods=['GET', 'POST'])    
 def method2():
@@ -66,21 +65,75 @@ def method2():
     else:
         id = request.form['id']
         pw = request.form['pw']
-        
-        if (id == 'aaa' and pw == '1234'):
-            print(id, pw)
-            root= Tk()
-            root.withdraw()
-            return msg.showinfo('로그인 성공!' ,'아이디: {} 패스워드: {}'.format(id, pw))
+        print (id,type(id))
+        print (pw,type([pw]))
+        # id 와 pw가 db 값이랑 비교해서 맞으면 맞다 틀리면 틀리다
+        ret = dbdb.select_user(id, pw)
+        if ret != None:
+            return "안녕하세요~ {}님".format(id)
         else:
-            root= Tk()
-            root.withdraw()
-            return msg.showinfo("로그인 실패", "잘못 입력하셨습니다.")
+            return "아이디 또는 패스워드를 확인하세요."
+        # if (id == 'aaa' and pw == '1234'):
+        #     return "안녕하세요~ {} 님".format(id)
+            # print(id, pw)
+            # root= Tk()
+            # root.withdraw()
+            # return msg.showinfo('로그인 성공!' ,'아이디: {} 패스워드: {}'.format(id, pw))
+        # else:
+            # return "잘못 입력하셨습니다."
+            # root= Tk()
+            # root.withdraw()
+            # return msg.showinfo("로그인 실패", "잘못 입력하셨습니다.")
+
+# 로그인 
+@app.route('/login', methods=['GET', 'POST']) 
+def login(): 
+    if request.method == 'GET': 
+        return render_template('login.html') 
+    else: 
+        id = request.form['id'] 
+        pw = request.form['pw'] 
+        print(id, type(id))
+        print(pw, type(pw))
+        
+        # id와 pw가 임의로 정한 값이랑 비교 해서 맞으면 맞다 틀리면 틀리다 
+        ret = dbdb.select_user(id, pw)
+        print(ret[2])
+        if ret != None:
+            return "안녕하세요~ {}님".format(ret[2])
+        else:
+            return "아이디 또는 패스워드를 확인하세요."
+        
 
 
 
+#회원가입
+@app.route('/join', methods=['GET', 'POST'])    
+def join():
+    if request.method == 'GET':
+        return render_template('join.html')
+     
+    else:
+        id = request.form['id']
+        pw = request.form['pw']
+        name = request.form['name']
+        print (id,type(id))
+        print (pw,type(pw))
+
+        ret = dbdb.check_id(id)
+        if ret != None:
+            return '''
+                    <script>
+                    alert('다른 아이디를 사용하세요');
+                    location.href='/join';
+                    </script>
+                   '''
+        # id 와 pw가 db 값이랑 비교해서 맞으면 맞다 틀리면 틀리다
+        dbdb.insert_user(id, pw, name)
+        return redirect(url_for('login'))
+        
 @app.route('/form')
-def login():
+def form():
     return render_template('test1.html')
 
 
